@@ -30,7 +30,7 @@ function renderCharScreen() {
 
     for (let i = 0; i < projectedVertices.length; i++) {
         let pos = mapScreenToCharScreen(projectedVertices[i]);
-        charScreen[pos[0]][pos[1]] = "#"
+        charScreen[pos[0]][pos[1]] = "@"
     }
 
     for (let y = charScreenHeight - 1; y > 0 ; y--) {
