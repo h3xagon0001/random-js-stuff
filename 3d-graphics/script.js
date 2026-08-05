@@ -1,7 +1,7 @@
 const charScreenElement = document.getElementById("charScreenElement");
-const screenWidth = 3;
-const screenHeight = 3;
-const focalLength = 1;
+const screenWidth = 4;
+const screenHeight = 4;
+const focalLength = 2;
 const charScreenWidth = screenWidth * 20;
 const charScreenHeight = screenHeight * 10;
 
@@ -55,29 +55,34 @@ function drawCube(size, pos) {
     solid.push(new Vector3(pos.x + halfSize, pos.y - halfSize, pos.z + halfSize));
 };
 
-function rotateVertice(pos, angle, center) {
+function rotateVertice(pos, angle, axis, center) {
     let distance;
     let theta;
-    let x = pos.x - center.x;
-    let y = pos.y - center.y;
-    let z = pos.z - center.z;
+    let oldX = pos.x - center.x;
+    let oldY = pos.y - center.y;
+    let oldZ = pos.z - center.z;
+    let x = oldX;
+    let y = oldY;
+    let z = oldZ;
 
-    distance = Math.sqrt(x ** 2 + z ** 2);
-    theta = Math.acos(x / distance) + angle.x;
-
-    x = distance * Math.cos(theta) + center.x;
-    if (z > 0) {
-        z = distance * Math.sin(theta) + center.z;
+    if (axis === "x") {
+        x = oldX * Math.cos(angle) - oldZ * Math.sin(angle);
+        z = oldZ * Math.cos(angle) + oldX * Math.sin(angle);
     }
-    else {
-        z = center.z - distance * Math.sin(theta);
+    else if (axis === "y") {
+        y = oldY * Math.cos(angle) - oldZ * Math.sin(angle);
+        z = oldZ * Math.cos(angle) + oldY * Math.sin(angle);
+    }
+    else if (axis === "z") {
+        y = oldY * Math.cos(angle) - oldX * Math.sin(angle);
+        x = oldX * Math.cos(angle) + oldY * Math.sin(angle);
     }
 
+            
 
-    console.log(x, y, z)
 
 
-    return new Vector3(x, y, z);
+    return new Vector3(x + center.x, y + center.y, z + center.z);
 };
 
 function initCharScreen() {
@@ -113,7 +118,7 @@ function renderCharScreen() {
             (pos.y > 0) &&
             (pos.y < charScreenHeight - 1)
         ) {
-            charScreen[pos.x][pos.y] = "@";
+            charScreen[pos.x][pos.y] = i.toString();
         };
     };
 
@@ -138,15 +143,17 @@ let rotation = 0;
         vertices = [];
 
         for (let i = 0; i < solid.length; i++) {
-            let rotatedVertice = rotateVertice(solid[i], new Vector3(rotation, 0, 0), new Vector3(0, 0, 3));
+            let rotatedVertice = rotateVertice(solid[i], rotation, "x", new Vector3(0, 0, 3));
+            rotatedVertice = rotateVertice(rotatedVertice, rotation, "y", new Vector3(0, 0, 3));
+            rotatedVertice = rotateVertice(rotatedVertice, rotation, "z", new Vector3(0, 0, 3));
+            
             if (rotatedVertice.z > 0) { vertices.push(rotatedVertice); }
         };
 
         renderCharScreen();
 
-        rotation += Math.PI / 4;
-
+        rotation += Math.PI / 32;
 
         loop();
-    }, 3000);
+    }, 1000/24);
 })();
