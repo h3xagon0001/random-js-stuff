@@ -81,6 +81,25 @@ function drawCubeEdges(size, pos, resolution) {
     }   
 };
 
+function drawCubeFaces(size, pos, resolution) {
+    let stepSize = size / (resolution - 1);
+    let halfSize = size / 2;
+    
+
+    for (let i = 0; i < resolution; i++) {
+        for (let j = 0; j < resolution; j++) {
+            solid.push(new Vector3(pos.x - halfSize + i * stepSize, pos.y - halfSize + j * stepSize, pos.z - halfSize));
+            solid.push(new Vector3(pos.x - halfSize + i * stepSize, pos.y - halfSize + j * stepSize, pos.z + halfSize));
+
+            solid.push(new Vector3(pos.x - halfSize + i * stepSize, pos.y - halfSize, pos.z - halfSize + j * stepSize));
+            solid.push(new Vector3(pos.x - halfSize + i * stepSize, pos.y + halfSize, pos.z - halfSize + j * stepSize));
+
+            solid.push(new Vector3(pos.x - halfSize, pos.y - halfSize + i * stepSize, pos.z - halfSize + j * stepSize));
+            solid.push(new Vector3(pos.x + halfSize, pos.y - halfSize + i * stepSize, pos.z - halfSize + j * stepSize));
+        }
+    }
+};
+
 
 
 function rotateVertice(pos, angle, axis, center) {
@@ -135,6 +154,7 @@ function clearCharScreen() {
 function renderCharScreen() {
     charScreenElement.innerHTML = "";
     projectedVertices = [];
+    vertices.sort((a, b) => (a.z < b.z) ? 1 : -1);
 
     for (let i = 0; i < vertices.length; i++) {
         projectedVertices.push(projectVertice(vertices[i]));
