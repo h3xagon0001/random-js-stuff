@@ -4,6 +4,8 @@ const screenHeight = 4;
 const focalLength = 2;
 const charScreenWidth = screenWidth * 20;
 const charScreenHeight = screenHeight * 10;
+const gradientChars = "@@@@@%#*+=-:.";
+const gradientRange = [1, 5]
 
 let charScreen = [];
 let solid = [];
@@ -36,13 +38,14 @@ function mapScreenToCharScreen(pos) {
 
 function projectVertice(pos) {
     let scalingFactor = focalLength / pos.z;
-    return new Vector2(
+    return new Vector3(
         pos.x * scalingFactor,
-        pos.y * scalingFactor
+        pos.y * scalingFactor,
+        pos.z
     );
 };
 
-function drawCube(size, pos) {
+function drawCubeVertices(size, pos) {
     let halfSize = size / 2;
     solid.push(new Vector3(pos.x - halfSize, pos.y - halfSize, pos.z - halfSize));
     solid.push(new Vector3(pos.x - halfSize, pos.y + halfSize, pos.z - halfSize));
@@ -54,6 +57,31 @@ function drawCube(size, pos) {
     solid.push(new Vector3(pos.x + halfSize, pos.y + halfSize, pos.z + halfSize));
     solid.push(new Vector3(pos.x + halfSize, pos.y - halfSize, pos.z + halfSize));
 };
+
+function drawCubeEdges(size, pos, resolution) {
+    let stepSize = size / (resolution - 1);
+    let halfSize = size / 2;
+    
+
+    for (let i = 0; i < resolution; i++) {
+        solid.push(new Vector3(pos.x - halfSize, pos.y - halfSize, pos.z - halfSize + i * stepSize));
+        solid.push(new Vector3(pos.x - halfSize, pos.y + halfSize, pos.z - halfSize + i * stepSize));
+        solid.push(new Vector3(pos.x + halfSize, pos.y + halfSize, pos.z - halfSize + i * stepSize));
+        solid.push(new Vector3(pos.x + halfSize, pos.y - halfSize, pos.z - halfSize + i * stepSize));
+
+        solid.push(new Vector3(pos.x - halfSize + i * stepSize, pos.y - halfSize, pos.z - halfSize));
+        solid.push(new Vector3(pos.x - halfSize + i * stepSize, pos.y - halfSize, pos.z + halfSize));
+        solid.push(new Vector3(pos.x - halfSize + i * stepSize, pos.y + halfSize, pos.z - halfSize));
+        solid.push(new Vector3(pos.x - halfSize + i * stepSize, pos.y + halfSize, pos.z + halfSize));
+
+        solid.push(new Vector3(pos.x - halfSize, pos.y - halfSize + i * stepSize, pos.z - halfSize));
+        solid.push(new Vector3(pos.x - halfSize, pos.y - halfSize + i * stepSize, pos.z + halfSize));
+        solid.push(new Vector3(pos.x + halfSize, pos.y - halfSize + i * stepSize, pos.z - halfSize));
+        solid.push(new Vector3(pos.x + halfSize, pos.y - halfSize + i * stepSize, pos.z + halfSize));
+    }   
+};
+
+
 
 function rotateVertice(pos, angle, axis, center) {
     let distance;
@@ -112,15 +140,19 @@ function renderCharScreen() {
         projectedVertices.push(projectVertice(vertices[i]));
 
         let pos = mapScreenToCharScreen(projectedVertices[i]);
+        let depth = projectVertice(vertices[i]).z
+
         if (
             (pos.x > 0) &&
             (pos.x < charScreenWidth - 1) &&
             (pos.y > 0) &&
             (pos.y < charScreenHeight - 1)
         ) {
-            charScreen[pos.x][pos.y] = i.toString();
+            // charScreen[pos.x][pos.y] =  "@";
+            // charScreen[pos.x][pos.y] =  i.toString();
+            charScreen[pos.x][pos.y] = gradientChars[Math.round(depth / gradientRange[1] * gradientChars.length)]
         };
-    };
+    };    
 
     for (let y = 0; y < charScreenHeight; y++) {
         let rowElement = document.createElement("div");
@@ -133,7 +165,8 @@ function renderCharScreen() {
 
 initCharScreen();
 
-drawCube(2, new Vector3(0, 0, 3));
+drawCubeEdges(2, new Vector3(0, 0, 3), 50);
+
 
 let rotation = 0;
 
@@ -152,7 +185,7 @@ let rotation = 0;
 
         renderCharScreen();
 
-        rotation += Math.PI / 32;
+        rotation += Math.PI / 64;
 
         loop();
     }, 1000/24);
